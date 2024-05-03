@@ -1,6 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:smart_choice/pagecontrollers/auth_page.dart';
-import 'package:smart_choice/view/authview/home_page.dart';
+import 'package:smart_choice/pagecontrollers/object_detection_pages.dart';
 import 'package:flutter/material.dart';
 
 
@@ -14,7 +14,7 @@ class MainPage extends StatelessWidget {
         stream: FirebaseAuth.instance.authStateChanges(),
         builder: (context,snapshot){
           if(snapshot.hasData){
-            return  HomePage();
+            return ObjectDetectionPages();
           }
           else{
             return  AuthPage();
