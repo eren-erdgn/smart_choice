@@ -10,8 +10,24 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+
   final user = FirebaseAuth.instance.currentUser!;
   List<int> selectedNumbers = List.filled(10, 0);
+  
+  @override
+  void initState() {
+    super.initState();
+    fetchNumbers();
+  }
+
+  Future<void> fetchNumbers() async {
+    DocumentSnapshot doc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+    List<dynamic> numbers = doc.get('myArrayField');
+    for (int i = 0; i < numbers.length; i++) {
+      selectedNumbers[numbers[i]] = numbers[i] + 1;
+    }
+    setState(() {});
+  }
 
   void toggleNumber(int index) {
     setState(() {
@@ -40,13 +56,13 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Number Counter'),
+        title: const Text('Number Counter'),
       ),
       body: Column(
         children: [
           GridView.builder(
             shrinkWrap: true,
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 5,
               crossAxisSpacing: 8.0,
               mainAxisSpacing: 8.0,
@@ -75,7 +91,7 @@ class _HomePageState extends State<HomePage> {
               );
             },
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           Wrap(
             alignment: WrapAlignment.center,
             spacing: 8.0,
@@ -92,11 +108,18 @@ class _HomePageState extends State<HomePage> {
                 ),
                 child: Text(
                   '${selectedNumbers[index]}',
-                  style: TextStyle(fontSize: 18),
+                  style: const TextStyle(fontSize: 18),
                 ),
               ),
             ),
           ),
+          MaterialButton(
+              onPressed: () {
+                FirebaseAuth.instance.signOut();
+              },
+              color: Colors.deepPurple,
+              child: const Text('sign out'),
+            ),
         ],
       ),
     );
