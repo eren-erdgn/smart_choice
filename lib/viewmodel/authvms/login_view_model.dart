@@ -1,10 +1,10 @@
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:smart_choice/model/auth_model.dart';
 
 class LoginViewModel {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final AuthModel _authModel = AuthModel();
 
   Future<void> signIn(String email, String password) async {
-    await _auth.signInWithEmailAndPassword(
+    await _authModel.authInstance.signInWithEmailAndPassword(
       email: email.trim(),
       password: password.trim(),
     );

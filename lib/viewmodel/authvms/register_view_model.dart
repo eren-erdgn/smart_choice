@@ -1,16 +1,15 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:smart_choice/model/auth_model.dart';
 
 class RegisterViewModel {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-
+  final AuthModel _authModel = AuthModel();
 
   Future<void> signUp(String email, String password) async {
-    UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
+    UserCredential userCredential = await _authModel.authInstance.createUserWithEmailAndPassword(
       email: email.trim(),
       password: password.trim(),
     );
-    await FirebaseFirestore.instance.collection('users').doc(userCredential.user!.uid).set({
+    await _authModel.userDBInstance.collection('users').doc(userCredential.user!.uid).set({
       'myArrayField': {},
     });
   }
