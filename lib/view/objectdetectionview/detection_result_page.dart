@@ -48,7 +48,7 @@ class DetectionResultPage extends StatelessWidget {
         onPressed: () {
           onHomeButtonPressed();
         }, 
-        backgroundColor: Colors.green,
+        backgroundColor: Colors.deepPurple,
         child: const Icon(Icons.home), 
       ),
     );

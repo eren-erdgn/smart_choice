@@ -15,6 +15,7 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _passwordController = TextEditingController();
 
   final LoginViewModel _viewModel = LoginViewModel();
+  bool _loading = false;
 
   @override
   void dispose() {
@@ -24,10 +25,37 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> signIn() async {
+    setState(() {
+      _loading = true;
+    });
+
     final String email = _emailController.text.trim();
     final String password = _passwordController.text.trim();
 
-    await _viewModel.signIn(email, password);
+    String? errorMessage = await _viewModel.signIn(email, password);
+
+    setState(() {
+      _loading = false;
+    });
+
+    if (errorMessage != null) {
+      // Show AlertDialog if error occurred
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Error'),
+          content: Text(errorMessage),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+    }
   }
 
   @override
@@ -40,7 +68,8 @@ class _LoginPageState extends State<LoginPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(
+                
+                _loading ? const CircularProgressIndicator(color: Colors.deepPurple,strokeWidth: 9.0,) : const Icon(
                   Icons.search,
                   size: 100,
                 ),

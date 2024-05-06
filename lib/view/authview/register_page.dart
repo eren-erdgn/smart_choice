@@ -15,6 +15,7 @@ class _RegisterPageState extends State<RegisterPage> {
   final TextEditingController _confirmPasswordController = TextEditingController();
 
   final RegisterViewModel _viewModel = RegisterViewModel();
+  bool _loading = false;
 
   @override
   void dispose() {
@@ -25,13 +26,66 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   Future<void> signUp() async {
+  if (!_loading) {
+    setState(() {
+      _loading = true;
+    });
+
     final String email = _emailController.text.trim();
     final String password = _passwordController.text.trim();
 
     if (_viewModel.isPasswordConfirmed(password, _confirmPasswordController.text.trim())) {
-      await _viewModel.signUp(email, password);
+      String? errorMessage = await _viewModel.signUp(email, password);
+
+      if (mounted) {
+        setState(() {
+          _loading = false;
+        });
+
+        if (errorMessage != null) {
+          // Show AlertDialog if error occurred
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text('Error'),
+              content: Text(errorMessage),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('OK'),
+                ),
+              ],
+            ),
+          );
+        }
+      }
+    } else {
+      if (mounted) {
+        setState(() {
+          _loading = false;
+        });
+      }
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Error'),
+          content: const Text('Passwords do not match.'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
     }
   }
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +97,7 @@ class _RegisterPageState extends State<RegisterPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(
+                _loading ? const CircularProgressIndicator(color: Colors.deepPurple,strokeWidth: 9.0,) : const Icon(
                   Icons.search,
                   size: 100,
                 ),
