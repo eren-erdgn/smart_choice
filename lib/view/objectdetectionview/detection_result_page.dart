@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:smart_choice/view/laptopview/os_choice_page.dart';
 import 'package:ultralytics_yolo/predict/detect/detected_object.dart';
 
 class DetectionResultPage extends StatelessWidget {
@@ -36,17 +37,7 @@ class DetectionResultPage extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => Scaffold(
-                        appBar: AppBar(
-                          title: const Text('Object Details'),
-                        ),
-                        body: Center(
-                          child: Text(
-                            'Details about ${object.label}',
-                            style: const TextStyle(fontSize: 20),
-                          ),
-                        ),
-                      ),
+                      builder: (context) => const OsChoicePage()
                     ),
                   );
                 } else {

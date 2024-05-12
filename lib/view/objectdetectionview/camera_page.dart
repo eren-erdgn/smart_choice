@@ -67,7 +67,6 @@ class _CameraPageState extends State<CameraPage> {
 
                                             if (detectedObjects != null && detectedObjects!.isNotEmpty) {
                                                 isButtonPressed = true;
-                                                print('Detected Objects are here');
                                                 listObject(isButtonPressed,detectedObjects);
                                                 
                                             }

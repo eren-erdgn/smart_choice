@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:smart_choice/view/favoritelaptopview/favorite_laptop_page.dart';
 import 'package:smart_choice/view/objectdetectionview/camera_page.dart';
 import 'package:smart_choice/view/objectdetectionview/detection_result_page.dart';
 import 'package:smart_choice/view/homeview/home_page.dart';
@@ -15,12 +14,7 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> {
   var _activeScreen = 'home-page';
   List<DetectedObject> detectedObjects = [];
-
-  void _goFav(){
-    setState(() {
-      _activeScreen = 'favorite-laptops-page';
-    });
-  } 
+ 
   void _goCam(){
     setState(() {
       _activeScreen = 'camera-page';
@@ -42,11 +36,7 @@ class _MainPageState extends State<MainPage> {
 
   @override
   Widget build(BuildContext context) {
-    Widget screenWidget = HomePage(onCamButtonPressed: _goCam,onFavButtonPressed: _goFav,);
-
-    if(_activeScreen == 'favorite-laptops-page'){
-      screenWidget = FavoriteLaptopPage(onHomeButtonPressed: _goHome,);
-    }
+    Widget screenWidget = HomePage(onCamButtonPressed: _goCam);
     
     if(_activeScreen == 'camera-page'){
       screenWidget = CameraPage(_listObject);

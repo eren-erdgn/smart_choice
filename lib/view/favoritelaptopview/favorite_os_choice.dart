@@ -1,20 +1,14 @@
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:smart_choice/view/favoritelaptopview/favorite_laptop_page.dart';
 import 'package:flutter/material.dart';
-import 'package:smart_choice/view/favoritelaptopview/favorite_os_choice.dart';
 
-class HomePage extends StatefulWidget {
-  const HomePage({required this.onCamButtonPressed, super.key});
-  final void Function() onCamButtonPressed;
+class FavoriteOsPage extends StatefulWidget {
+  const FavoriteOsPage({super.key});
+
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<FavoriteOsPage> createState() => _FavoriteOsPageState();
 }
 
-class _HomePageState extends State<HomePage> {
-  @override
-  void initState() {
-    super.initState();
-  }
-
+class _FavoriteOsPageState extends State<FavoriteOsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -34,7 +28,8 @@ class _HomePageState extends State<HomePage> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => const FavoriteOsPage()),
+                      builder: (context) => const FavoriteLaptopPage(laptopCpu: 'laptopsmac',),
+                    ),
                   );
                 },
                 child: Container(
@@ -43,11 +38,7 @@ class _HomePageState extends State<HomePage> {
                     color: Colors.deepPurple,
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Center(
-                      child: Icon(
-                    Icons.favorite,
-                    size: 40.0,
-                  )),
+                  child: const Center(child: Text("Apple Silicon Chips")),
                 ),
               ),
             ),
@@ -59,33 +50,23 @@ class _HomePageState extends State<HomePage> {
                 horizontal: 25.0,
               ),
               child: GestureDetector(
-                onTap: widget.onCamButtonPressed,
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const FavoriteLaptopPage(laptopCpu: 'laptops',),
+                    ),
+                  );
+                },
                 child: Container(
                   padding: const EdgeInsets.all(100),
                   decoration: BoxDecoration(
                     color: Colors.purple,
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child:
-                      const Center(child: Icon(Icons.camera_alt, size: 40.0)),
-                ),
-              ),
-            ),
-            const SizedBox(
-              height: 70,
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 25.0),
-              child: GestureDetector(
-                onTap: FirebaseAuth.instance.signOut,
-                child: Container(
-                  padding: const EdgeInsets.all(50),
-                  decoration: BoxDecoration(
-                    color: Colors.red,
-                    borderRadius: BorderRadius.circular(12),
+                  child: const Center(
+                    child: Text("Intel or AMD Chips"),
                   ),
-                  child:
-                      const Center(child: Icon(Icons.exit_to_app, size: 40.0)),
                 ),
               ),
             ),

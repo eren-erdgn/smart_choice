@@ -1,26 +1,23 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
 import 'package:smart_choice/view/laptopview/laptop_details_page.dart';
 import 'package:smart_choice/viewmodel/laptopvm/laptop_view_model.dart';
+import 'package:flutter/material.dart';
 
-class FavoriteLaptopPage extends StatefulWidget {
-  const FavoriteLaptopPage({super.key, required this.laptopCpu});
-  
+class LaptopsPage extends StatefulWidget {
+  const LaptopsPage({super.key, required this.laptopCpu});
+
   final String laptopCpu;
+
   @override
-  State<FavoriteLaptopPage> createState() => _FavoriteLaptopPageState();
+  State<LaptopsPage> createState() => _LaptopsPageState();
 }
 
-class _FavoriteLaptopPageState extends State<FavoriteLaptopPage> {
+class _LaptopsPageState extends State<LaptopsPage> {
   final _laptopvm = LaptopViewModel();
   List<Map<String, dynamic>> laptops = [];
   List<Map<String, dynamic>> selectedLaptops = [];
-  List<Map<String, dynamic>> filteredSelectedLaptops = [];
   bool isFilterExpanded = false;
   bool isSortExpanded = false;
   Map<String, List<int>> filterIndexMap = {};
-  List<dynamic> numbers = [];
 
   @override
   void initState() {
@@ -28,33 +25,12 @@ class _FavoriteLaptopPageState extends State<FavoriteLaptopPage> {
     _fetchLaptops();
   }
 
-  Future<void> fetchNumbers() async {
-    DocumentSnapshot doc = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(FirebaseAuth.instance.currentUser!.uid)
-        .get();
-    setState(() {
-      numbers = doc.get('myArrayField');
-      _getSelectedLaptops();
-      filteredSelectedLaptops = List.from(selectedLaptops);
-    });
-  }
-
   Future<void> _fetchLaptops() async {
     await _laptopvm.fetchLaptops(widget.laptopCpu);
     setState(() {
-      laptops = List.from(_laptopvm.getLaptops);
-      fetchNumbers();
+      laptops = _laptopvm.getLaptops;
+      selectedLaptops = List.from(laptops);
     });
-  }
-
-  void _getSelectedLaptops() {
-    List<int> parsedNumbers = numbers.map((number) => int.parse(number.toString())).toList();
-    for (int i = 0; i < laptops.length; i++) {
-      if(parsedNumbers.contains(laptops[i]['laptop_id'])){
-        selectedLaptops.add(laptops[i]);
-      }
-    }
   }
 
   void _showFilterDialog(String attribute) async {
@@ -116,7 +92,7 @@ class _FavoriteLaptopPageState extends State<FavoriteLaptopPage> {
 
   List<String> _getUniqueItems(String key) {
     Set<String> keySet = {};
-    for (var laptop in selectedLaptops) {
+    for (var laptop in laptops) {
       keySet.add(laptop[key]);
     }
     return keySet.toList();
@@ -124,9 +100,9 @@ class _FavoriteLaptopPageState extends State<FavoriteLaptopPage> {
 
   void _applyFilter(String key, List<int> filterIndex) {
     filterIndexMap[key] = filterIndex;
-    filteredSelectedLaptops = [];
+    selectedLaptops = [];
     if (filterIndexMap.values.every((element) => element.isEmpty)) {
-      filteredSelectedLaptops = List.from(selectedLaptops);
+      selectedLaptops = List.from(laptops);
       setState(() {});
       return;
     }
@@ -139,7 +115,7 @@ class _FavoriteLaptopPageState extends State<FavoriteLaptopPage> {
     }
 
     // Her bir laptop için filtreleri kontrol et
-    for (var laptop in selectedLaptops) {
+    for (var laptop in laptops) {
       bool add = true;
       for (var entry in filterIndexMap.entries) {
         if(entry.value.isEmpty) continue;
@@ -150,14 +126,14 @@ class _FavoriteLaptopPageState extends State<FavoriteLaptopPage> {
         }
       }
       if (add) {
-        filteredSelectedLaptops.add(laptop);
+        selectedLaptops.add(laptop);
       }
     }
     setState(() {});
   }
 
   void _applySortingForPrice(String attribute, {bool ascending = true}) {
-    filteredSelectedLaptops.sort((a, b) {
+    selectedLaptops.sort((a, b) {
       double aValue = _parsePrice(a[attribute]);
       double bValue = _parsePrice(b[attribute]);
       if (ascending) {
@@ -183,7 +159,7 @@ class _FavoriteLaptopPageState extends State<FavoriteLaptopPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Favori Laptoplar'),
+        title: const Text('Laptop Listesi'),
       ),
       body: Column(
         children: [
@@ -270,28 +246,28 @@ class _FavoriteLaptopPageState extends State<FavoriteLaptopPage> {
             ),
           Expanded(
             child: ListView.builder(
-              itemCount: filteredSelectedLaptops.length,
+              itemCount: selectedLaptops.length,
               itemBuilder: (context, index) {
                 return Card(
                   child: ListTile(
                     leading: Image.memory(
-                      filteredSelectedLaptops[index]['foto'],
+                      selectedLaptops[index]['foto'],
                       width: 100,
                       height: 100,
                       fit: BoxFit.cover,
                     ),
                     title: Text(
-                      filteredSelectedLaptops[index]['model_ismi'],
+                      selectedLaptops[index]['model_ismi'],
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Fiyat: ${filteredSelectedLaptops[index]['fiyat']}'),
+                        Text('Fiyat: ${selectedLaptops[index]['fiyat']}'),
                         Text(
-                            'Ekran Boyutu: ${filteredSelectedLaptops[index]['ekran_boyutu']}'),
+                            'Ekran Boyutu: ${selectedLaptops[index]['ekran_boyutu']}'),
                         Text(
-                            'Çözünürlük: ${filteredSelectedLaptops[index]['ekran_cozunurlugu']}'),
+                            'Çözünürlük: ${selectedLaptops[index]['ekran_cozunurlugu']}'),
                       ],
                     ),
                     onTap: () {
@@ -299,7 +275,7 @@ class _FavoriteLaptopPageState extends State<FavoriteLaptopPage> {
                         context,
                         MaterialPageRoute(
                           builder: (context) => LaptopDetailsPage(
-                            laptop: filteredSelectedLaptops[index],
+                            laptop: selectedLaptops[index],
                             laptopCpu: widget.laptopCpu,
                           ),
                         ),
