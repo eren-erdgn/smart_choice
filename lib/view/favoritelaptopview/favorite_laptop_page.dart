@@ -6,7 +6,7 @@ import 'package:smart_choice/viewmodel/laptopvm/laptop_view_model.dart';
 
 class FavoriteLaptopPage extends StatefulWidget {
   const FavoriteLaptopPage({super.key, required this.laptopCpu});
-  
+
   final String laptopCpu;
   @override
   State<FavoriteLaptopPage> createState() => _FavoriteLaptopPageState();
@@ -49,9 +49,10 @@ class _FavoriteLaptopPageState extends State<FavoriteLaptopPage> {
   }
 
   void _getSelectedLaptops() {
-    List<int> parsedNumbers = numbers.map((number) => int.parse(number.toString())).toList();
+    List<int> parsedNumbers =
+        numbers.map((number) => int.parse(number.toString())).toList();
     for (int i = 0; i < laptops.length; i++) {
-      if(parsedNumbers.contains(laptops[i]['laptop_id'])){
+      if (parsedNumbers.contains(laptops[i]['laptop_id'])) {
         selectedLaptops.add(laptops[i]);
       }
     }
@@ -64,7 +65,6 @@ class _FavoriteLaptopPageState extends State<FavoriteLaptopPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(attribute),
           content: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
               return SingleChildScrollView(
@@ -99,14 +99,14 @@ class _FavoriteLaptopPageState extends State<FavoriteLaptopPage> {
               onPressed: () {
                 Navigator.pop(context);
               },
-              child: const Text('İptal'),
+              child: const Text('Cancel'),
             ),
             TextButton(
               onPressed: () {
                 _applyFilter(attribute, filterIndex);
                 Navigator.pop(context);
               },
-              child: const Text('Uygula'),
+              child: const Text('Apply'),
             ),
           ],
         );
@@ -142,7 +142,7 @@ class _FavoriteLaptopPageState extends State<FavoriteLaptopPage> {
     for (var laptop in selectedLaptops) {
       bool add = true;
       for (var entry in filterIndexMap.entries) {
-        if(entry.value.isEmpty) continue;
+        if (entry.value.isEmpty) continue;
         String selectedAttribute = laptop[entry.key];
         if (!selectedAttributes.contains(selectedAttribute)) {
           add = false;
@@ -153,6 +153,19 @@ class _FavoriteLaptopPageState extends State<FavoriteLaptopPage> {
         filteredSelectedLaptops.add(laptop);
       }
     }
+    setState(() {});
+  }
+
+  void _applySortingForRank(String attribute, {bool ascending = true}) {
+    selectedLaptops.sort((a, b) {
+      double aValue = _parseRank(a[attribute]);
+      double bValue = _parseRank(b[attribute]);
+      if (ascending) {
+        return aValue.compareTo(bValue);
+      } else {
+        return bValue.compareTo(aValue);
+      }
+    });
     setState(() {});
   }
 
@@ -169,8 +182,12 @@ class _FavoriteLaptopPageState extends State<FavoriteLaptopPage> {
     setState(() {});
   }
 
+  double _parseRank(String rankString) {
+    return double.parse(rankString);
+  }
+
   double _parsePrice(String priceString) {
-    if(priceString.isEmpty) return 0.0;
+    if (priceString.isEmpty) return 0.0;
     // "TL" işaretini kaldır
     priceString = priceString.replaceAll("TL", "").trim();
     // Nokta ve virgül işaretlerini düzgünleştir
@@ -183,7 +200,7 @@ class _FavoriteLaptopPageState extends State<FavoriteLaptopPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Favori Laptoplar'),
+        title: const Text('Favorite Laptops'),
       ),
       body: Column(
         children: [
@@ -223,27 +240,27 @@ class _FavoriteLaptopPageState extends State<FavoriteLaptopPage> {
                 children: [
                   ElevatedButton(
                     onPressed: () => _showFilterDialog('renk'),
-                    child: const Text('Renk'),
+                    child: const Text('Color'),
                   ),
                   ElevatedButton(
                     onPressed: () => _showFilterDialog('ekran_yenileme_hizi'),
-                    child: const Text('Ekran Yenileme Hızı'),
+                    child: const Text('Refresh rate'),
                   ),
                   ElevatedButton(
                     onPressed: () => _showFilterDialog('bellek_ram'),
-                    child: const Text('Ram Boyutu'),
+                    child: const Text('Ram size'),
                   ),
                   ElevatedButton(
                     onPressed: () => _showFilterDialog('sabit_disk_ssd_boyutu'),
-                    child: const Text('SSD Boyutu'),
+                    child: const Text('SSD size'),
                   ),
                   ElevatedButton(
                     onPressed: () => _showFilterDialog('ekran_boyutu'),
-                    child: const Text('Ekran Boyutu'),
+                    child: const Text('Screen size'),
                   ),
                   ElevatedButton(
                     onPressed: () => _showFilterDialog('urun_ailesi'),
-                    child: const Text('Ürün Ailesi'),
+                    child: const Text('Series'),
                   ),
                 ],
               ),
@@ -258,12 +275,22 @@ class _FavoriteLaptopPageState extends State<FavoriteLaptopPage> {
                   ElevatedButton(
                     onPressed: () =>
                         _applySortingForPrice('fiyat', ascending: true),
-                    child: const Text('Fiyat Artan'),
+                    child: const Text('price low to high'),
                   ),
                   ElevatedButton(
                     onPressed: () =>
                         _applySortingForPrice('fiyat', ascending: false),
-                    child: const Text('Fiyat Azalan'),
+                    child: const Text('price high to low'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () =>
+                        _applySortingForRank('rank', ascending: true),
+                    child: const Text('rank low to high'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () =>
+                        _applySortingForRank('rank', ascending: false),
+                    child: const Text('rank high to low'),
                   ),
                 ],
               ),
@@ -274,24 +301,49 @@ class _FavoriteLaptopPageState extends State<FavoriteLaptopPage> {
               itemBuilder: (context, index) {
                 return Card(
                   child: ListTile(
-                    leading: Image.memory(
-                      filteredSelectedLaptops[index]['foto'],
+                    leading: Container(
                       width: 100,
                       height: 100,
-                      fit: BoxFit.cover,
+                      child: Image.memory(
+                        selectedLaptops[index]['foto'],
+                        fit: BoxFit.cover,
+                      ),
                     ),
-                    title: Text(
-                      filteredSelectedLaptops[index]['model_ismi'],
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Fiyat: ${filteredSelectedLaptops[index]['fiyat']}'),
-                        Text(
-                            'Ekran Boyutu: ${filteredSelectedLaptops[index]['ekran_boyutu']}'),
-                        Text(
-                            'Çözünürlük: ${filteredSelectedLaptops[index]['ekran_cozunurlugu']}'),
+                    title: Row(
+                      children: <Widget>[
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                selectedLaptops[index]['model_ismi'],
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold),
+                              ),
+                              Text('Price: ${selectedLaptops[index]['fiyat']}'),
+                              Text(
+                                  'Model Series: ${selectedLaptops[index]['urun_ailesi']}'),
+                            ],
+                          ),
+                        ),
+                        Container(
+                            padding: const EdgeInsets.all(2),
+                            decoration: BoxDecoration(
+                              color: Colors.deepPurple,
+                              borderRadius: BorderRadius.circular(5),
+                            ),
+                            child: Column(
+                              children: [
+                                const Text(
+                                  'Rank:',
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                                Text(
+                                  '${selectedLaptops[index]['rank']}',
+                                  style: const TextStyle(color: Colors.white),
+                                )
+                              ],
+                            )),
                       ],
                     ),
                     onTap: () {
@@ -299,7 +351,7 @@ class _FavoriteLaptopPageState extends State<FavoriteLaptopPage> {
                         context,
                         MaterialPageRoute(
                           builder: (context) => LaptopDetailsPage(
-                            laptop: filteredSelectedLaptops[index],
+                            laptop: selectedLaptops[index],
                             laptopCpu: widget.laptopCpu,
                           ),
                         ),

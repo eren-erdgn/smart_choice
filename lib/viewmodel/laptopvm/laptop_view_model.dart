@@ -16,7 +16,7 @@ class LaptopViewModel{
   }
 
   Future<void> fetchLaptops(String laptopList) async {
-    String dbPath = await _copy('assets/laptop_test.db');
+    String dbPath = await _copy('assets/laptop_test(1).db');
     Database database = await openDatabase(dbPath);
     
     List<Map<String, dynamic>> queryResult = await database.rawQuery(

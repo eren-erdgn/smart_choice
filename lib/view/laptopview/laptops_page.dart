@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:smart_choice/view/laptopview/laptop_details_page.dart';
 import 'package:smart_choice/viewmodel/laptopvm/laptop_view_model.dart';
 import 'package:flutter/material.dart';
@@ -40,7 +42,6 @@ class _LaptopsPageState extends State<LaptopsPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(attribute),
           content: StatefulBuilder(
             builder: (BuildContext context, StateSetter setState) {
               return SingleChildScrollView(
@@ -75,14 +76,14 @@ class _LaptopsPageState extends State<LaptopsPage> {
               onPressed: () {
                 Navigator.pop(context);
               },
-              child: const Text('İptal'),
+              child: const Text('Cancel'),
             ),
             TextButton(
               onPressed: () {
                 _applyFilter(attribute, filterIndex);
                 Navigator.pop(context);
               },
-              child: const Text('Uygula'),
+              child: const Text('Apply'),
             ),
           ],
         );
@@ -118,7 +119,7 @@ class _LaptopsPageState extends State<LaptopsPage> {
     for (var laptop in laptops) {
       bool add = true;
       for (var entry in filterIndexMap.entries) {
-        if(entry.value.isEmpty) continue;
+        if (entry.value.isEmpty) continue;
         String selectedAttribute = laptop[entry.key];
         if (!selectedAttributes.contains(selectedAttribute)) {
           add = false;
@@ -129,6 +130,19 @@ class _LaptopsPageState extends State<LaptopsPage> {
         selectedLaptops.add(laptop);
       }
     }
+    setState(() {});
+  }
+
+  void _applySortingForRank(String attribute, {bool ascending = true}) {
+    selectedLaptops.sort((a, b) {
+      double aValue = _parseRank(a[attribute]);
+      double bValue = _parseRank(b[attribute]);
+      if (ascending) {
+        return aValue.compareTo(bValue);
+      } else {
+        return bValue.compareTo(aValue);
+      }
+    });
     setState(() {});
   }
 
@@ -145,8 +159,12 @@ class _LaptopsPageState extends State<LaptopsPage> {
     setState(() {});
   }
 
+  double _parseRank(String rankString) {
+    return double.parse(rankString);
+  }
+
   double _parsePrice(String priceString) {
-    if(priceString.isEmpty) return 0.0;
+    if (priceString.isEmpty) return 0.0;
     // "TL" işaretini kaldır
     priceString = priceString.replaceAll("TL", "").trim();
     // Nokta ve virgül işaretlerini düzgünleştir
@@ -159,7 +177,7 @@ class _LaptopsPageState extends State<LaptopsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Laptop Listesi'),
+        title: const Text('Laptop List'),
       ),
       body: Column(
         children: [
@@ -199,27 +217,27 @@ class _LaptopsPageState extends State<LaptopsPage> {
                 children: [
                   ElevatedButton(
                     onPressed: () => _showFilterDialog('renk'),
-                    child: const Text('Renk'),
+                    child: const Text('Color'),
                   ),
                   ElevatedButton(
                     onPressed: () => _showFilterDialog('ekran_yenileme_hizi'),
-                    child: const Text('Ekran Yenileme Hızı'),
+                    child: const Text('Refresh rate'),
                   ),
                   ElevatedButton(
                     onPressed: () => _showFilterDialog('bellek_ram'),
-                    child: const Text('Ram Boyutu'),
+                    child: const Text('Ram size'),
                   ),
                   ElevatedButton(
                     onPressed: () => _showFilterDialog('sabit_disk_ssd_boyutu'),
-                    child: const Text('SSD Boyutu'),
+                    child: const Text('SSD size'),
                   ),
                   ElevatedButton(
                     onPressed: () => _showFilterDialog('ekran_boyutu'),
-                    child: const Text('Ekran Boyutu'),
+                    child: const Text('Screen size'),
                   ),
                   ElevatedButton(
                     onPressed: () => _showFilterDialog('urun_ailesi'),
-                    child: const Text('Ürün Ailesi'),
+                    child: const Text('Series'),
                   ),
                 ],
               ),
@@ -234,12 +252,22 @@ class _LaptopsPageState extends State<LaptopsPage> {
                   ElevatedButton(
                     onPressed: () =>
                         _applySortingForPrice('fiyat', ascending: true),
-                    child: const Text('Fiyat Artan'),
+                    child: const Text('price low to high'),
                   ),
                   ElevatedButton(
                     onPressed: () =>
                         _applySortingForPrice('fiyat', ascending: false),
-                    child: const Text('Fiyat Azalan'),
+                    child: const Text('price high to low'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () =>
+                        _applySortingForRank('rank', ascending: true),
+                    child: const Text('rank low to high'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () =>
+                        _applySortingForRank('rank', ascending: false),
+                    child: const Text('rank high to low'),
                   ),
                 ],
               ),
@@ -250,24 +278,49 @@ class _LaptopsPageState extends State<LaptopsPage> {
               itemBuilder: (context, index) {
                 return Card(
                   child: ListTile(
-                    leading: Image.memory(
-                      selectedLaptops[index]['foto'],
+                    leading: Container(
                       width: 100,
                       height: 100,
-                      fit: BoxFit.cover,
+                      child: Image.memory(
+                        selectedLaptops[index]['foto'],
+                        fit: BoxFit.cover,
+                      ),
                     ),
-                    title: Text(
-                      selectedLaptops[index]['model_ismi'],
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Fiyat: ${selectedLaptops[index]['fiyat']}'),
-                        Text(
-                            'Ekran Boyutu: ${selectedLaptops[index]['ekran_boyutu']}'),
-                        Text(
-                            'Çözünürlük: ${selectedLaptops[index]['ekran_cozunurlugu']}'),
+                    title: Row(
+                      children: <Widget>[
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                selectedLaptops[index]['model_ismi'],
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold),
+                              ),
+                              Text('Price: ${selectedLaptops[index]['fiyat']}'),
+                              Text(
+                                  'Model Series: ${selectedLaptops[index]['urun_ailesi']}'),
+                            ],
+                          ),
+                        ),
+                        Container(
+                            padding: const EdgeInsets.all(2),
+                            decoration: BoxDecoration(
+                              color: Colors.deepPurple,
+                              borderRadius: BorderRadius.circular(5),
+                            ),
+                            child: Column(
+                              children: [
+                                const Text(
+                                  'Rank:',
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                                Text(
+                                  '${selectedLaptops[index]['rank']}',
+                                  style: const TextStyle(color: Colors.white),
+                                )
+                              ],
+                            )),
                       ],
                     ),
                     onTap: () {

@@ -28,7 +28,9 @@ class _FavoriteOsPageState extends State<FavoriteOsPage> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const FavoriteLaptopPage(laptopCpu: 'laptopsmac',),
+                      builder: (context) => const FavoriteLaptopPage(
+                        laptopCpu: 'laptopsmac',
+                      ),
                     ),
                   );
                 },
@@ -38,7 +40,7 @@ class _FavoriteOsPageState extends State<FavoriteOsPage> {
                     color: Colors.deepPurple,
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Center(child: Text("Apple Silicon Chips")),
+                  child: const Center(child: Text("Apple Silicon Chips",style: TextStyle(color: Colors.white,fontSize: 20),)),
                 ),
               ),
             ),
@@ -54,7 +56,9 @@ class _FavoriteOsPageState extends State<FavoriteOsPage> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const FavoriteLaptopPage(laptopCpu: 'laptops',),
+                      builder: (context) => const FavoriteLaptopPage(
+                        laptopCpu: 'laptops',
+                      ),
                     ),
                   );
                 },
@@ -65,7 +69,10 @@ class _FavoriteOsPageState extends State<FavoriteOsPage> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Center(
-                    child: Text("Intel or AMD Chips"),
+                    child: Text(
+                      "Intel or AMD Chips",
+                      style: TextStyle(color: Colors.white, fontSize: 20),
+                    ),
                   ),
                 ),
               ),

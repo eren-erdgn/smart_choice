@@ -38,7 +38,7 @@ class _OsChoicePageState extends State<OsChoicePage> {
                     color: Colors.deepPurple,
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Center(child: Text("Apple Silicon Chips")),
+                  child: const Center(child: Text("Apple Silicon Chips",style: TextStyle(color: Colors.white,fontSize: 20),)),
                 ),
               ),
             ),
@@ -65,7 +65,7 @@ class _OsChoicePageState extends State<OsChoicePage> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Center(
-                    child: Text("Intel or AMD Chips"),
+                    child: Text("Intel or AMD Chips",style: TextStyle(color: Colors.white,fontSize: 20),),
                   ),
                 ),
               ),
