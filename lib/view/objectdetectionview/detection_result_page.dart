@@ -45,14 +45,14 @@ class DetectionResultPage extends StatelessWidget {
                     context: context,
                     builder: (BuildContext context) {
                       return AlertDialog(
-                        title: const Text("Uyari!"),
-                        content: Text("${object.label} henüz sisteme eklenmemiştir."),
+                        title: const Text("Warning!"),
+                        content: Text("${object.label} product has not been added to the system yet."),
                         actions: <Widget>[
                           TextButton(
                             onPressed: () {
                               Navigator.of(context).pop();
                             },
-                            child: const Text("Tamam"),
+                            child: const Text("OK"),
                           ),
                         ],
                       );
