@@ -3,7 +3,7 @@ import 'package:smart_choice/viewmodel/cameravm/camera_view_model.dart';
 import 'package:ultralytics_yolo/ultralytics_yolo.dart';
 
 class CameraPage extends StatefulWidget {
-  const CameraPage(this.onCameraButtonPressed,{super.key});
+  const CameraPage(this.onCameraButtonPressed, {super.key});
   final void Function(bool isButtonPressed, List<DetectedObject> detectedObjects) onCameraButtonPressed;
 
   @override
@@ -14,6 +14,7 @@ class _CameraPageState extends State<CameraPage> {
   final CameraViewModel _cameraViewModel = CameraViewModel();
   final controller = UltralyticsYoloCameraController();
   List<DetectedObject>? detectedObjects;
+
   @override
   void dispose() {
     super.dispose();
@@ -21,68 +22,59 @@ class _CameraPageState extends State<CameraPage> {
 
   @override
   Widget build(BuildContext context) {
-    var isButtonPressed = false;
-
-    void listObject(isButtonPressed, detectedObjects) {
-      if(isButtonPressed){
-        widget.onCameraButtonPressed(isButtonPressed, detectedObjects);
-      }
-    }
     return Scaffold(
       body: FutureBuilder<bool>(
-        future: _cameraViewModel.checkPermissions(),
+        future: _cameraViewModel.checkCameraPermission(),
         builder: (context, snapshot) {
-          final allPermissionsGranted = snapshot.data ?? false;
-
-          return !allPermissionsGranted
-              ? Container()
-              : FutureBuilder<ObjectDetector>(
-                  future: _cameraViewModel.initObjectDetectorWithLocalModel(),
-                  builder: (context, snapshot) {
-                    final predictor = snapshot.data;
-
-                    return predictor == null
-                        ? Container()
-                        : Stack(
-                            children: [
-                              UltralyticsYoloCameraPreview(
-                                controller: controller,
-                                predictor: predictor, 
-                                onCameraCreated: () {  
-                                  predictor.loadModel(useGpu: true);
-                                },
-                              ),
-                              Align(
-                                alignment: Alignment.bottomCenter,
-                                child: Padding(
-                                  padding: const EdgeInsets.all(30.0),
-                                  child: ElevatedButton(
-                                    onPressed: () {
-                                      predictor
-                                        .detectionResultStream
-                                        .listen((List<DetectedObject?>? result) {
-                                            setState(() {
-                                                detectedObjects = result?.cast<DetectedObject>();
-                                            });
-
-                                            if (detectedObjects != null && detectedObjects!.isNotEmpty) {
-                                                isButtonPressed = true;
-                                                listObject(isButtonPressed,detectedObjects);
-                                                
-                                            }
-                                        });
-                                    },
-                                    child: const Text('Show Results'),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          );
-                  },
-                );
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (!snapshot.data!) {
+            return const Center(
+              child: Text("You need to give permission for the camera"),
+            );
+          }
+          return FutureBuilder<ObjectDetector>(
+            future: _cameraViewModel.initObjectDetectorWithLocalModel(),
+            builder: (context, snapshot) {
+              final predictor = snapshot.data;
+              if (predictor == null) {
+                return Container();  // Show nothing if the detector is not ready
+              }
+              return Stack(
+                children: [
+                  UltralyticsYoloCameraPreview(
+                    controller: controller,
+                    predictor: predictor,
+                    onCameraCreated: () {
+                      predictor.loadModel(useGpu: true);
+                    },
+                  ),
+                  Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Padding(
+                      padding: const EdgeInsets.all(30.0),
+                      child: ElevatedButton(
+                        onPressed: () {
+                          predictor.detectionResultStream.listen((List<DetectedObject?>? result) {
+                            setState(() {
+                              detectedObjects = result?.cast<DetectedObject>();
+                            });
+                            if (detectedObjects != null && detectedObjects!.isNotEmpty) {
+                              widget.onCameraButtonPressed(true, detectedObjects!);
+                            }
+                          });
+                        },
+                        child: const Text('Show Results'),
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            },
+          );
         },
       ),
     );
   }
 }
-

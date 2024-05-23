@@ -34,26 +34,15 @@ class CameraViewModel {
     return file.path;
   }
 
-  Future<bool> checkPermissions() async {
-    List<Permission> permissions = [];
-
+  Future<bool> checkCameraPermission() async {
     var cameraStatus = await Permission.camera.status;
-    if (!cameraStatus.isGranted) permissions.add(Permission.camera);
-
-    var storageStatus = await Permission.storage.status;
-    if (!storageStatus.isGranted) permissions.add(Permission.storage);
-
-    if (permissions.isEmpty) {
-      return true;
-    } else {
-      try {
-        Map<Permission, PermissionStatus> statuses =
-            await permissions.request();
-        return statuses[Permission.camera] == PermissionStatus.granted &&
-            statuses[Permission.storage] == PermissionStatus.granted;
-      } on Exception catch (_) {
-        return false;
-      }
+    if (!cameraStatus.isGranted) {
+      var status = await Permission.camera.request();
+      return status == PermissionStatus.granted;
     }
+    return true;  // Return true if permission is already granted
   }
+  
+ 
+
 }
